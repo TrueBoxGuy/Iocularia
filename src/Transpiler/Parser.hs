@@ -25,14 +25,12 @@ lhs :: Parser LHS
 lhs = symbol $ LHS <$> symbol term <*> many (symbol term) -- sepBy is too greedy
 
 -- | Parses the right hand side of an expression, which can either be a term, or an application of two '@rhs'.
--- This parser associates application as so: 'f a b' = '(f a) b'; brackets can be used for different associations.
 rhs :: Parser RHS
-rhs = symbol $ choice [try $ App <$> symbol precedent <*> symbol part, Term <$> term]
+rhs = symbol $ choice [try $ App <$> symbol part <*> symbol part, Term <$> term]
   where
-    precedent = part <|> rhs
     part = Term <$> term <|> brackets rhs
 
--- | Parses a '@Convertible'@
+-- | Parses a '@Convertible'@.
 expression :: Parser Convertible
 expression = Expression <$> (lhs <* sSymbol "=") <*> (rhs <* sSymbol ";")
 
