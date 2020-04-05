@@ -74,10 +74,10 @@ ensureNoDuplicates = sequence . fmap toUnique . group . sort . fmap name
 splitInlineable :: [Convertible] -> ([Convertible], [Convertible])
 splitInlineable exprs = partition (flip elem inlineNames . name) exprs
   where
-    dependencies bound (Term a) = pure a
+    dependencies bound (Term a) = filter (flip notElem bound) [a]
     dependencies bound (App l r) = ($ r) <> ($ l) $ dependencies bound
     list = fmap toIdentify exprs
-    toIdentify t@(Expression (LHS n bound) _) = (n, bound, t)
+    toIdentify t@(Expression (LHS n bound) r) = (n, dependencies bound r, t)
     inlineNames = fst <$> identifyInlineable list
 
 -- | Converts a program into a lambda expression.
