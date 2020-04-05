@@ -1,0 +1,9 @@
+packages: ./Lambda-Calculus.cabal
+
+package Lambda-Calculus
+  haddock-executables: true
+  documentation: true
+  haddock-html-location: https://hackage.haskell.org/packages/archive/$pkg/latest/doc/html
+
+program-options
+  haddock-options: --odir=./docs
