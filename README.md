@@ -1,5 +1,10 @@
-# Iocularia
+<p align="center">
+    <a href="https://trueboxguy.github.io/Iocularia/">Documentation</a>
+</p>
 
+***
+
+# Iocularia
 Iocularia is a language, which looks similar to Haskell, but everything is a function. It supports recursion in a non-naive way 
 (i.e. cycles between functions can cause recursion). Its syntax is shown below: 
 ### Left Hand Side
