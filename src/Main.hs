@@ -1,3 +1,12 @@
+{-|
+Module      : Main
+Description : A treat
+License     : Apache License 2.0
+Stability   : experimental
+
+The meme in its final form.
+-}
+
 module Main where
 
 import Lambda.Lambda
