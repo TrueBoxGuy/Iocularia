@@ -22,7 +22,7 @@ term = try (some letterChar)
 -- | Parses the left hand side of an equation, consisting more than 1 space separated terms, the first of which
 -- being the name of the variable.
 lhs :: Parser LHS
-lhs = symbol $ LHS <$> term <*> many (symbol term) -- sepBy is too greedy
+lhs = symbol $ LHS <$> symbol term <*> many (symbol term) -- sepBy is too greedy
 
 -- | Parses the right hand side of an equation, which can either be a term, or an application of two '@rhs'.
 rhs :: Parser RHS
@@ -32,7 +32,7 @@ rhs = symbol $ choice [try $ App <$> symbol part <*> part, Term <$> term]
 
 -- | Parses an @'Equation'@.
 equation :: Parser Equation
-equation = Equation <$> (lhs <* string "=") <*> (rhs <* string ";")
+equation = Equation <$> (lhs <* sSymbol "=") <*> (rhs <* string ";")
 
 -- | Parses a program: many @'Equation'@s.
 program :: Parser [Equation]
