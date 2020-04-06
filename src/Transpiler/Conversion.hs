@@ -1,10 +1,10 @@
 {-|
 Module      : Transpiler.Conversion
-Description : Converts between the Convertible type and the Lambda type.
+Description : Converts between the Equation type and the Lambda type.
 License     : Apache License 2.0
 Stability   : experimental
 
-Converts from @'Convertible'@ to @'Lambda'@ using a method that: allows for recursion between multiple variables;
+Converts from @'Equation'@ to @'Lambda'@ using a method that: allows for recursion between multiple variables;
 is suitably efficient.
 -}
 
@@ -22,27 +22,27 @@ import Data.Bool
 -- | Type representing return value of @'makeAccessor'@.
 type Scope a = (String -> Either String (L.Expr (ScopeTerm a)))
 
--- | Represents the right hand side of an expression, which can either be a term or an application of multiple RHSses.
+-- | Represents the right hand side of an equation, which can either be a term or an application of multiple RHSses.
 data RHS = App RHS RHS | Term String
 
--- | Represents the left hand side of an expression: an expression's name and the list of bound variables it takes.
+-- | Represents the left hand side of an equation: an equation's name and the list of bound variables it takes.
 data LHS = LHS String [String]
 
--- | Represents an expression that can be converted to a @'L.Expr' a@, which consists of an @'LHS'@ and @'RHS'@.
-data Convertible = Expression LHS RHS
+-- | Represents an equation that can be converted to a @'L.Expr' a@, which consists of an @'LHS'@ and @'RHS'@.
+data Equation = Equation LHS RHS
 
--- | Gets the name of an expression
-name :: Convertible -> String
-name (Expression (LHS n _) _) = n
+-- | Gets the name of an equation
+name :: Equation -> String
+name (Equation (LHS n _) _) = n
 
--- | Converts the right hand side of an expression to a @'L.Expr' a@, given its scope.
+-- | Converts the right hand side of an equation to a @'L.Expr' a@, given its scope.
 convertRHS :: Integral a => Scope a -> RHS -> Either String (L.Expr (ScopeTerm a))
 convertRHS f (Term s) = f s
 convertRHS f (App l r) = L.App <$> convertRHS f l <*> convertRHS f r
 
--- | Generates the scope of the right hand side of an expression, and then converts it.
-convertExpression :: Integral a => [String] -> Scope a -> Convertible -> Either String (L.Expr (ScopeTerm a))
-convertExpression global inliner (Expression (LHS lName vars) rhs)
+-- | Generates the scope of the right hand side of an equation, and then converts it.
+convertExpression :: Integral a => [String] -> Scope a -> Equation -> Either String (L.Expr (ScopeTerm a))
+convertExpression global inliner (Equation (LHS lName vars) rhs)
   = addName (lambdas <$> convertRHS scope rhs)
   where
     lambdas = foldr (.) id (L.Lambda <$ vars)
@@ -50,7 +50,7 @@ convertExpression global inliner (Expression (LHS lName vars) rhs)
     scope = makeAccessor vars global inliner
 
 -- | Makes a function from which variables can be chosen, by applying @'truthAccessor'@ and @'falseAccessor'@
--- to a bunary structure.
+-- to a binary structure.
 boolChoice :: Integral a => [L.Expr (ScopeTerm a)] -> L.Expr (ScopeTerm a)
 boolChoice [] = L.Term $ Inner 0 -- enables for error of main not being defined
 boolChoice [e] = e
@@ -61,27 +61,27 @@ boolChoice a = L.Lambda (L.App (L.App (L.Term $ Inner 0) (d $ boolChoice l)) (d 
     d = addDepth 1
 
 -- | Errors with the name of a duplicate variable if it exists.
-ensureNoDuplicates :: [Convertible] -> Either String [String]
+ensureNoDuplicates :: [Equation] -> Either String [String]
 ensureNoDuplicates = sequence . fmap toUnique . group . sort . fmap name
   where
-    name (Expression (LHS n _) _) = n
+    name (Equation (LHS n _) _) = n
     toUnique [] = Left "the world is broken"
     toUnique [a] = Right a
     toUnique (a:_) = Left ("duplicate definitions of " <> a <> " exist")
 
--- | Converts convertible so that @'identifyInlineable'@ can be used, and returns inlineable and global variables
+-- | Converts equations so that @'identifyInlineable'@ can be used, and returns inlineable and global variables
 -- in order.
-splitInlineable :: [Convertible] -> ([Convertible], [Convertible])
+splitInlineable :: [Equation] -> ([Equation], [Equation])
 splitInlineable exprs = partition (flip elem inlineNames . name) exprs
   where
     dependencies bound (Term a) = filter (flip notElem bound) [a]
     dependencies bound (App l r) = ($ r) <> ($ l) $ dependencies bound
     list = fmap toIdentify exprs
-    toIdentify t@(Expression (LHS n bound) r) = (n, dependencies bound r, t)
+    toIdentify t@(Equation (LHS n bound) r) = (n, dependencies bound r, t)
     inlineNames = fst <$> identifyInlineable list
 
 -- | Converts a program into a lambda expression.
-toExpression :: Integral a => [Convertible] -> Either String (L.Expr a)
+toExpression :: Integral a => [Equation] -> Either String (L.Expr a)
 toExpression defs
   -- both the function and the value that the scope is being applied to must be taken in
   -- access only requires applications, so it does not cause a depth change
