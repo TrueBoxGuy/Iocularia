@@ -4,7 +4,7 @@ Description : Lambda Combinators
 License     : Apache License 2.0
 Stability   : experimental
 
-Contains the combinators: @'truthAccessor'@; @'falseAccessor'@; @'yCombinator'.
+Contains some typical lambda combinators.
 -}
 
 module Lambda.Combinators where
