@@ -60,8 +60,8 @@ accessIndex a l n = newExpression
 
 -- | Accesses a global variable from the global scope: see @'accessIndex'@ for an in detail explanation of how this works.
 makeGlobalAccessor :: Integral a => [String] -> String -> Maybe (L.Expr (ScopeTerm a))
-makeGlobalAccessor terms access = accessIndex (L.Term Global) (i $ length terms) . i <$> findIndex (== access) terms
-  where i = fromIntegral
+makeGlobalAccessor terms access
+  = accessIndex (L.Term Global) (fromIntegral $ length terms) . fromIntegral <$> findIndex (== access) terms
 
 -- | Accesses main, but outside of the @'yCombinator'@: this enables a program to be run.
 accessMain :: Integral a => [String] -> (L.Expr (ScopeTerm a)) -> Maybe (L.Expr (ScopeTerm a))
