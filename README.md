@@ -15,12 +15,14 @@ main x
 
 ### Right Hand Side
 
-The right hand side can either be a term (the name of another expression or a bound variable) or the application of two right hand sides. In this application, anything that is not a term must be put in brackets:
+The right hand side can either be a term (the name of another expression or a bound variable) or the application of two right hand sides. In this left associative application, anything that is not a term must be put in brackets.
 
 ```hs
 f x
 (f x) g
 f (x g)
+f g h i
+f (g h) i
 ```
 ### Expression
 
