@@ -1,13 +1,17 @@
 cabal-version:       2.4
 
 name:                Lambda-Calculus
+synopsis:            A tool for generating untyped lambda calculus
+description:         Iocularia is an untyped language that allows for mutual
+                     recursion, and can be converted to De Brujin leveled
+                     lambda calculus and be reduced by this tool.
 version:             0.1.0.0
 license:             Apache-2.0
 license-file:        LICENSE
 author:              TrueBoxGuy
 maintainer:          gamer.tmt@gmail.com
 category:            Math
-extra-source-files:  CHANGELOG.md
+extra-source-files:  CHANGELOG.md, README.md
 data-dir:            data
 
 executable Lambda-Calculus
